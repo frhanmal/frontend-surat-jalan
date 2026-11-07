@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Digital Surat Jalan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; } .menu-card { transition: all 0.2s ease; cursor: pointer; } .menu-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }</style>
+</head>
+<body>
+    <nav class="bg-blue-800 text-white p-4 shadow-md"><div class="max-w-6xl mx-auto flex items-center gap-3"><i class="fas fa-box-open text-2xl"></i><h1 class="text-xl font-bold">Digital Surat Jalan</h1></div></nav>
+    <div class="max-w-2xl mx-auto p-4 mt-10">
+        <div class="bg-white rounded-xl shadow border p-8 text-center">
+            <i class="fas fa-cube text-5xl text-blue-600 mb-4"></i><h2 class="text-2xl font-bold mb-2">Pilih Role Anda</h2><p class="text-gray-500 mb-8">Pilih menu akses untuk masuk ke sistem.</p>
+            <div class="space-y-4 text-left">
+                <div onclick="login('Resepsionis', 'resepsionis.html')" class="menu-card flex items-center p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50"><div class="bg-blue-100 text-blue-600 p-3 rounded-lg mr-4"><i class="fas fa-laptop text-xl"></i></div><div class="flex-1"><h3 class="font-bold text-gray-800">Resepsionis</h3><p class="text-sm text-gray-500">Buat Surat Jalan Baru</p></div><i class="fas fa-chevron-right text-gray-300"></i></div>
+                <div onclick="login('Driver', 'driver.html')" class="menu-card flex items-center p-4 border rounded-lg hover:border-orange-500 hover:bg-orange-50"><div class="bg-orange-100 text-orange-600 p-3 rounded-lg mr-4"><i class="fas fa-truck text-xl"></i></div><div class="flex-1"><h3 class="font-bold text-gray-800">Driver</h3><p class="text-sm text-gray-500">Update Pengambilan Barang</p></div><i class="fas fa-chevron-right text-gray-300"></i></div>
+                <!-- Perbaikan Ikon: Disamakan menggunakan fa-box-open -->
+                <div onclick="login('Penerima', 'penerima.html')" class="menu-card flex items-center p-4 border rounded-lg hover:border-purple-500 hover:bg-purple-50"><div class="bg-purple-100 text-purple-600 p-3 rounded-lg mr-4"><i class="fas fa-box-open text-xl"></i></div><div class="flex-1"><h3 class="font-bold text-gray-800">Penerima</h3><p class="text-sm text-gray-500">Konfirmasi Terima & Tanda Tangan</p></div><i class="fas fa-chevron-right text-gray-300"></i></div>
+                <div onclick="login('PIC', 'dashboard.html')" class="menu-card flex items-center p-4 border rounded-lg hover:border-green-500 hover:bg-green-50"><div class="bg-green-100 text-green-600 p-3 rounded-lg mr-4"><i class="fas fa-table-columns text-xl"></i></div><div class="flex-1"><h3 class="font-bold text-gray-800">PIC Dashboard</h3><p class="text-sm text-gray-500">Monitoring & Rekap Data</p></div><i class="fas fa-chevron-right text-gray-300"></i></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        async function login(role, targetPage) {
+            if (role !== 'Penerima') {
+                let pass = (role === 'PIC') ? 'GSCCOS' : 'CCOS';
+                const result = await Swal.fire({ title: `Akses ${role}`, input: 'password', inputPlaceholder: 'Masukkan Password', showCancelButton: true });
+                if (result.dismiss === Swal.DismissReason.cancel || result.dismiss === Swal.DismissReason.backdrop) return;
+                if (!result.isConfirmed || result.value !== pass) return Swal.fire('Ditolak', 'Password salah!', 'error');
+            }
+            window.location.href = targetPage;
+        }
+    </script>
+</body>
+</html>
