@@ -9,16 +9,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style id="print-style-dinamis">
+        /* Style default: Kertas Normal / A4 untuk cetak Surat Induk */
+        @media print {
+            @page { margin: 10mm; }
+            html, body { background-color: white !important; margin: 0 !important; padding: 0 !important; }
+            .no-print, nav, .swal2-container { display: none !important; }
+            #print-area { width: 100%; font-family: Arial, sans-serif; display: block; }
+            #print-barcode-area { display: none !important; }
+        }
+    </style>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        @media print {
-            @page { size: 80mm 80mm; margin: 0mm !important; }
-            html, body { background-color: white !important; margin: 0 !important; padding: 0 !important; width: 80mm; height: 80mm; }
-            .no-print, nav, .swal2-container { display: none !important; }
-            #print-area { width: 100%; font-family: Arial, sans-serif; }
-            #print-barcode-area { width: 80mm; height: 80mm; margin: 0; padding: 0; display: block; }
-            .print-label-wrapper { width: 80mm !important; height: 80mm !important; page-break-after: always !important; margin: 0 !important; box-sizing: border-box !important; }
-        }
     </style>
 </head>
 <body>
@@ -60,6 +62,7 @@
         </div>
     </div>
 
+    <!-- AREA PRINT SURAT JALAN -->
     <div id="print-area" style="display: none;" class="bg-white p-8">
         <div style="max-width: 800px; margin: 0 auto; line-height: 1.5; font-size: 13px;">
             <div style="display: flex; justify-content: space-between; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px;">
@@ -79,11 +82,38 @@
         </div>
     </div>
     
+    <!-- AREA PRINT BARCODE -->
     <div id="print-barcode-area" style="display: none;" class="bg-white"><div id="barcode-dynamic-container"></div></div>
 
     <script>
         const API_URL = 'https://backend-surat-jalan.vercel.app/api/surat-jalan';
         let itemCounter = 1, generatedData = [];
+
+        function ubahStylePrint(tipe) {
+            const style = document.getElementById('print-style-dinamis');
+            if (tipe === 'barcode') {
+                style.innerHTML = `
+                    @media print {
+                        @page { size: 80mm 80mm; margin: 0mm !important; }
+                        html, body { background-color: white !important; margin: 0 !important; padding: 0 !important; width: 80mm; height: 80mm; }
+                        .no-print, nav, .swal2-container { display: none !important; }
+                        #print-area { display: none !important; }
+                        #print-barcode-area { width: 80mm; height: 80mm; margin: 0; padding: 0; display: block; }
+                        .print-label-wrapper { width: 80mm !important; height: 80mm !important; page-break-after: always !important; margin: 0 !important; box-sizing: border-box !important; }
+                    }
+                `;
+            } else {
+                style.innerHTML = `
+                    @media print {
+                        @page { margin: 10mm; }
+                        html, body { background-color: white !important; margin: 0 !important; padding: 0 !important; }
+                        .no-print, nav, .swal2-container { display: none !important; }
+                        #print-area { width: 100%; font-family: Arial, sans-serif; display: block; }
+                        #print-barcode-area { display: none !important; }
+                    }
+                `;
+            }
+        }
 
         function tambahBarang() {
             itemCounter++; const container = document.getElementById('dynamic-items-container'); const newBlock = document.createElement('div');
@@ -173,6 +203,7 @@
                 showCancelButton: true, confirmButtonText: '<i class="fas fa-print mr-2"></i> Cetak', cancelButtonText: 'Batal', confirmButtonColor: '#2563eb', returnFocus: false
             }).then((res) => {
                 if (res.isConfirmed) {
+                    ubahStylePrint('master'); // Aktifkan style print Kertas Normal
                     setTimeout(() => {
                         document.getElementById('app-container').style.display = 'none'; 
                         document.getElementById('print-barcode-area').style.display = 'none'; 
@@ -198,7 +229,6 @@
                     
                     wrapper.style.cssText = 'width: 80mm; height: 80mm; margin: 0; padding: 4mm; box-sizing: border-box; border: 2px dashed #000; text-align: center; font-family: Arial, sans-serif; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; background: white;';
                     
-                    // PENAMBAHAN: Menampilkan Nama Pengirim pada label stiker
                     wrapper.innerHTML = `
                         <h3 style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">LABEL PENGIRIMAN</h3>
                         <div id="qr-${data.id}" style="display: flex; justify-content: center; margin-bottom: 5px;"></div>
@@ -231,6 +261,7 @@
                 }
             }).then((res) => {
                 if (res.isConfirmed) {
+                    ubahStylePrint('barcode'); // Aktifkan style print khusus ukuran 80x80mm
                     setTimeout(() => {
                         document.getElementById('app-container').style.display = 'none'; 
                         document.getElementById('print-area').style.display = 'none'; 
