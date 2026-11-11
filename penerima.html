@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Penerima</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -11,14 +12,13 @@
     <style>body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }</style>
 </head>
 <body class="bg-gray-100">
-    <!-- Perbaikan Ikon: Disamakan menggunakan fa-box-open -->
     <nav class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center"><div class="flex items-center gap-3"><i class="fas fa-box-open text-2xl"></i><h1 class="text-xl font-bold">Menu Penerima</h1></div><a href="index.html" class="bg-white text-blue-800 px-4 py-2 rounded font-semibold text-sm hover:bg-gray-100"><i class="fas fa-arrow-left mr-2"></i>Kembali</a></nav>
     <div class="max-w-xl mx-auto p-4 mt-6">
         <div class="bg-white rounded-xl shadow border p-6">
             <h2 class="text-2xl font-bold border-b pb-4 mb-4 text-purple-600">Konfirmasi Terima Barang</h2>
             <div class="mb-4">
                 <label class="block text-sm font-semibold mb-1">Scan Barcode / Masukkan 4 Digit Terakhir</label>
-                <div class="flex gap-2"><input type="text" id="penerima-search-id" placeholder="Cth: 3398" class="flex-1 border p-2 rounded outline-none focus:ring-2 focus:ring-purple-500" onkeypress="if(event.key === 'Enter') cariPenerimaID()"><button type="button" onclick="startScanner()" class="bg-gray-200 text-gray-800 px-4 rounded hover:bg-gray-300"><i class="fas fa-qrcode text-lg"></i></button><button onclick="cariPenerimaID()" class="bg-purple-600 text-white px-4 rounded font-bold hover:bg-purple-700">Proses</button></div>
+                <div class="flex flex-col gap-3 w-full"><input type="text" id="penerima-search-id" placeholder="Cth: 3398" class="flex-1 border p-2 rounded outline-none focus:ring-2 focus:ring-purple-500" onkeypress="if(event.key === 'Enter') cariPenerimaID()"><button type="button" onclick="startScanner()" class="bg-gray-200 text-gray-800 px-4 rounded hover:bg-gray-300"><i class="fas fa-qrcode text-lg"></i></button><button onclick="cariPenerimaID()" class="bg-purple-600 text-white px-4 rounded font-bold hover:bg-purple-700">Proses</button></div>
             </div>
             <div id="penerima-form-area" class="hidden border-t pt-4 mt-4">
                 <div class="bg-purple-50 border border-purple-100 p-3 rounded mb-4 text-sm"><p><strong>Barang:</strong> <span id="p-barang"></span></p><p><strong>Diantar Oleh:</strong> <span id="p-driver"></span></p></div>
@@ -27,7 +27,7 @@
                     <div class="mb-3"><label class="block text-sm font-semibold mb-1">NRP <span class="text-red-500">*</span></label><input type="text" id="p-nrp" required class="w-full border p-2 rounded outline-none"></div>
                     <div class="mb-4">
                         <label class="block text-sm font-semibold mb-1">Foto Bukti Terima Fisik <span class="text-red-500">*</span></label>
-                        <div class="flex gap-2 mb-2"><button type="button" onclick="openCameraModal('p-foto')" class="flex-1 bg-gray-200 border border-gray-400 p-2 rounded font-bold hover:bg-gray-300"><i class="fas fa-camera mr-2"></i> Buka Kamera</button><label class="flex-1 bg-gray-200 border border-gray-400 p-2 rounded font-bold text-center cursor-pointer pt-2 hover:bg-gray-300"><i class="fas fa-folder-open mr-2"></i> File<input type="file" accept="image/*" class="hidden" onchange="handleFileUpload(this)"></label></div>
+                        <div class="flex gap-2 mb-2"><button type="button" onclick="openCameraModal()" class="flex-1 bg-gray-200 border border-gray-400 p-2 rounded font-bold hover:bg-gray-300"><i class="fas fa-camera mr-2"></i> Buka Kamera</button><label class="flex-1 bg-gray-200 border border-gray-400 p-2 rounded font-bold text-center cursor-pointer pt-2 hover:bg-gray-300"><i class="fas fa-folder-open mr-2"></i> File<input type="file" accept="image/*" class="hidden" onchange="handleFileUpload(this)"></label></div>
                         <img id="p-foto-preview" class="hidden w-full h-48 object-cover rounded border mt-2" /><input type="hidden" id="p-foto-value">
                     </div>
                     <div class="mb-4"><label class="block text-sm font-semibold mb-1">Tanda Tangan <span class="text-red-500">*</span></label><div class="border-2 border-dashed border-purple-300 rounded bg-gray-50"><canvas id="signature-pad" class="w-full h-40"></canvas></div><button type="button" onclick="sigPad.clear()" class="text-xs font-bold text-red-500 mt-2 hover:underline">Hapus TTD</button></div>
@@ -40,15 +40,25 @@
     <div id="scanner-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-4">
         <div class="bg-white rounded-lg p-4 w-full max-w-md"><div class="flex justify-between items-center mb-4 border-b pb-2"><h3 class="font-bold text-lg"><i class="fas fa-qrcode mr-2"></i>Scanner Internal</h3><button onclick="stopScanner()" class="text-red-500 font-bold text-xl"><i class="fas fa-times"></i></button></div><div id="reader" width="100%"></div></div>
     </div>
-    <div id="camera-modal" class="hidden fixed inset-0 bg-black z-[100] flex flex-col justify-between"><div class="flex justify-between p-4 bg-black bg-opacity-50 absolute top-0 w-full z-10"><h3 class="text-white font-bold">Ambil Foto</h3><button onclick="closeCameraModal()" class="text-white text-3xl"><i class="fas fa-times"></i></button></div><video id="camera-video" autoplay playsinline class="w-full h-full object-cover"></video><div class="absolute bottom-10 w-full flex justify-center z-10"><button onclick="capturePhoto()" class="bg-white p-4 rounded-full border-4 w-20 h-20"><i class="fas fa-camera text-3xl"></i></button></div><canvas id="camera-canvas" class="hidden"></canvas></div>
+    
+    <div id="camera-modal" class="hidden fixed inset-0 bg-black z-[100] flex flex-col justify-between">
+        <div class="flex justify-between p-4 bg-black bg-opacity-50 absolute top-0 w-full z-10"><h3 class="text-white font-bold">Ambil Foto</h3><button onclick="closeCameraModal()" class="text-white text-3xl"><i class="fas fa-times"></i></button></div>
+        <video id="camera-video" autoplay playsinline class="w-full h-full object-cover"></video>
+        <div class="absolute bottom-10 w-full flex justify-center z-10"><button type="button" onclick="capturePhoto()" class="bg-white p-4 rounded-full border-4 w-20 h-20 flex items-center justify-center"><i class="fas fa-camera text-3xl"></i></button></div>
+        <canvas id="camera-canvas" class="hidden"></canvas>
+    </div>
 
     <script>
         const API_URL = 'https://backend-surat-jalan.vercel.app/api/surat-jalan';
         let sigPad = null, currentActiveID = null, db = [], html5QrcodeScanner = null, mediaStream = null;
 
         window.addEventListener('load', async () => {
-            const scanId = sessionStorage.getItem('pendingScanId');
-            if (scanId) { document.getElementById('penerima-search-id').value = scanId; setTimeout(cariPenerimaID, 300); sessionStorage.removeItem('pendingScanId'); }
+            const urlParams = new URLSearchParams(window.location.search);
+            const scanId = urlParams.get('scan_id');
+            if (scanId) { 
+                document.getElementById('penerima-search-id').value = scanId; 
+                setTimeout(cariPenerimaID, 300); 
+            }
         });
 
         function startScanner() {
@@ -66,10 +76,82 @@
             }, (error) => {});
         }
         function stopScanner() { if (html5QrcodeScanner) html5QrcodeScanner.clear(); document.getElementById('scanner-modal').classList.add('hidden'); }
+
         async function openCameraModal() { document.getElementById('camera-modal').classList.remove('hidden'); try { mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); document.getElementById('camera-video').srcObject = mediaStream; } catch (err) { closeCameraModal(); } }
         function closeCameraModal() { if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; } document.getElementById('camera-modal').classList.add('hidden'); }
-        function capturePhoto() { const video = document.getElementById('camera-video'); const canvas = document.getElementById('camera-canvas'); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0); const base64Img = canvas.toDataURL('image/jpeg', 0.5); document.getElementById('p-foto-preview').src = base64Img; document.getElementById('p-foto-preview').classList.remove('hidden'); document.getElementById('p-foto-value').value = base64Img; closeCameraModal(); }
-        function handleFileUpload(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { const img = new Image(); img.onload = function() { const canvas = document.createElement('canvas'); let w = img.width, h = img.height; if (w > 800) { h *= 800 / w; w = 800; } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); const base64Img = canvas.toDataURL('image/jpeg', 0.5); document.getElementById('p-foto-preview').src = base64Img; document.getElementById('p-foto-preview').classList.remove('hidden'); document.getElementById('p-foto-value').value = base64Img; }; img.src = e.target.result; }; reader.readAsDataURL(input.files[0]); } }
+
+        // FUNGSI TIMESTAMP PENERIMA
+        // FUNGSI TIMESTAMP FOTO (Diperkecil & Dipojok)
+        function prosesFotoDenganTimestamp(sourceImg, isFileObj = false, callback) {
+            const renderCanvas = (imageObj) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = imageObj.width;
+                canvas.height = imageObj.height;
+                ctx.drawImage(imageObj, 0, 0);
+
+                // Hilangkan awalan teks, hanya tanggal dan jam
+                const sekarang = new Date();
+                const timestampText = sekarang.toLocaleString('id-ID');
+
+                // Styling teks: font normal (tidak bold), ukuran lebih kecil
+                const fontSize = Math.max(16, canvas.width / 40); // Font diperkecil
+                ctx.font = `normal ${fontSize}px Arial`; 
+                ctx.fillStyle = 'yellow';
+                ctx.lineWidth = Math.max(1, fontSize / 20); // Border/outline ditipiskan
+                ctx.strokeStyle = 'black';
+
+                // Posisi teks di pojok kiri bawah (padding dikurangi)
+                const paddingX = 15;
+                const paddingY = canvas.height - 15;
+
+                ctx.strokeText(timestampText, paddingX, paddingY);
+                ctx.fillText(timestampText, paddingX, paddingY);
+
+                callback(canvas.toDataURL('image/jpeg', 0.7));
+            };
+
+            if (isFileObj) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = () => renderCanvas(img);
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(sourceImg);
+            } else {
+                const img = new Image();
+                img.onload = () => renderCanvas(img);
+                img.src = sourceImg;
+            }
+        }
+        
+        function capturePhoto() { 
+            const video = document.getElementById('camera-video'); 
+            const canvas = document.getElementById('camera-canvas'); 
+            canvas.width = video.videoWidth; 
+            canvas.height = video.videoHeight; 
+            canvas.getContext('2d').drawImage(video, 0, 0); 
+            
+            const rawBase64 = canvas.toDataURL('image/jpeg', 0.9);
+            closeCameraModal();
+
+            prosesFotoDenganTimestamp(rawBase64, false, function(finalBase64) {
+                document.getElementById('p-foto-preview').src = finalBase64; 
+                document.getElementById('p-foto-preview').classList.remove('hidden'); 
+                document.getElementById('p-foto-value').value = finalBase64;
+            });
+        }
+
+        function handleFileUpload(input) { 
+            if (input.files && input.files[0]) { 
+                prosesFotoDenganTimestamp(input.files[0], true, function(finalBase64) {
+                    document.getElementById('p-foto-preview').src = finalBase64; 
+                    document.getElementById('p-foto-preview').classList.remove('hidden'); 
+                    document.getElementById('p-foto-value').value = finalBase64;
+                });
+            } 
+        }
 
         function initSignaturePad() { const canvas = document.getElementById('signature-pad'); if (!canvas) return; const ratio = Math.max(window.devicePixelRatio || 1, 1); canvas.width = canvas.offsetWidth * ratio; canvas.height = canvas.offsetHeight * ratio; canvas.getContext("2d").scale(ratio, ratio); if (!sigPad) sigPad = new SignaturePad(canvas, { backgroundColor: 'rgb(249, 250, 251)' }); else sigPad.clear(); }
 
@@ -78,7 +160,6 @@
             Swal.fire({ title: 'Mencari...', didOpen: () => Swal.showLoading() });
             try {
                 const res = await fetch(API_URL); db = await res.json(); Swal.close();
-                
                 const data = db.find(x => x.id === inputVal || x.id.endsWith(inputVal));
                 
                 if (!data) return Swal.fire('Error', 'Barang tidak ditemukan!', 'error');

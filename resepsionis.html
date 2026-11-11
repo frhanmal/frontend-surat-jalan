@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Resepsionis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -10,15 +11,12 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        
         @media print {
             @page { margin: 0; }
             html, body { background-color: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print, nav, .swal2-container { display: none !important; }
             #print-area { width: 100%; font-family: Arial, sans-serif; }
             #print-barcode-area { width: 100%; text-align: center; }
-            
-            /* PERBAIKAN: Memaksa ganti halaman (kertas) tiap 1 barcode */
             .print-label-wrapper { page-break-after: always !important; margin-bottom: 0 !important; }
         }
     </style>
@@ -76,21 +74,9 @@
             
             <div id="print-tanggal" style="text-align: right; margin-bottom: 15px; font-size: 13px;">Cileungsi, ......................... 20...</div>
             <div style="display: flex; justify-content: space-between; text-align: center; font-size: 13px;">
-                <div style="width: 30%; display: flex; flex-direction: column; justify-content: space-between;">
-                    <p style="margin-bottom: 10px;">Yang menerima</p>
-                    <div style="height: 60px; display: flex; justify-content: center; align-items: end;"><img id="print-ttd-master" style="max-height: 100%; display: none;"></div>
-                    <p id="print-nama-penerima-master" style="border-bottom: 1px solid black; margin: 0; padding-bottom: 5px; min-height: 20px;"></p>
-                </div>
-                <div style="width: 30%; display: flex; flex-direction: column; justify-content: space-between;">
-                    <p style="margin-bottom: 10px;">Menyetujui,</p>
-                    <div style="height: 60px;"></div>
-                    <p style="border-bottom: 1px solid black; margin: 0; padding-bottom: 5px; min-height: 20px;"></p>
-                </div>
-                <div style="width: 30%; display: flex; flex-direction: column; justify-content: space-between;">
-                    <p style="margin-bottom: 10px;">Pengirim,</p>
-                    <div style="height: 60px;"></div>
-                    <p style="border-bottom: 1px solid black; margin: 0; padding-bottom: 5px; min-height: 20px;">Resepsionis</p>
-                </div>
+                <div style="width: 30%; display: flex; flex-direction: column; justify-content: space-between;"><p style="margin-bottom: 10px;">Yang menerima</p><div style="height: 60px; display: flex; justify-content: center; align-items: end;"><img id="print-ttd-master" style="max-height: 100%; display: none;"></div><p id="print-nama-penerima-master" style="border-bottom: 1px solid black; margin: 0; padding-bottom: 5px; min-height: 20px;"></p></div>
+                <div style="width: 30%; display: flex; flex-direction: column; justify-content: space-between;"><p style="margin-bottom: 10px;">Menyetujui,</p><div style="height: 60px;"></div><p style="border-bottom: 1px solid black; margin: 0; padding-bottom: 5px; min-height: 20px;"></p></div>
+                <div style="width: 30%; display: flex; flex-direction: column; justify-content: space-between;"><p style="margin-bottom: 10px;">Pengirim,</p><div style="height: 60px;"></div><p style="border-bottom: 1px solid black; margin: 0; padding-bottom: 5px; min-height: 20px;">Resepsionis</p></div>
             </div>
         </div>
     </div>
@@ -212,8 +198,6 @@
                 if (data) {
                     const qrUrl = window.location.origin + "/index.html?scan_id=" + data.id;
                     const wrapper = document.createElement('div'); wrapper.className = 'print-label-wrapper';
-                    
-                    // PERBAIKAN: Penambahan page-break-after: always; agar diprint per lembar stiker 1-1
                     wrapper.style.cssText = 'width: 46mm; margin: 0 auto; padding: 5px; box-sizing: border-box; border: 1.5px dashed #000; text-align: center; font-family: Arial, sans-serif; overflow: hidden; page-break-after: always;';
                     
                     wrapper.innerHTML = `
@@ -230,7 +214,8 @@
                     container.appendChild(wrapper);
                     
                     setTimeout(() => {
-                        new QRCode(document.getElementById(`qr-${data.id}`), { text: qrUrl, width: 75, height: 75 });
+                        // PERBAIKAN: Menggunakan CorrectLevel.L agar QR tidak menyatu/blur saat dicetak
+                        new QRCode(document.getElementById(`qr-${data.id}`), { text: qrUrl, width: 85, height: 85, correctLevel: QRCode.CorrectLevel.L });
                         JsBarcode(`#bc-${data.id}`, data.id, { format: "CODE128", width: 1.2, height: 35, displayValue: false, margin: 0 });
                     }, 100);
                 }
@@ -242,7 +227,7 @@
                 html: `<div class="flex flex-col items-center p-4 border border-dashed rounded bg-gray-50"><h3 class="font-bold mb-2 text-sm">LABEL PENGIRIMAN</h3><div id="swal-qr" class="mb-2"></div><svg id="swal-bc" class="w-full h-8"></svg><p class="font-bold mt-1 text-xs">${firstId}</p></div><p class="mt-3 text-xs text-red-600 font-bold">Pastikan Paper Size Sesuai Stiker</p>`,
                 showCancelButton: true, confirmButtonText: '<i class="fas fa-print mr-2"></i> Cetak Label', cancelButtonText: 'Batal', confirmButtonColor: '#2563eb', returnFocus: false,
                 didOpen: () => {
-                    new QRCode(document.getElementById('swal-qr'), { text: window.location.origin + "/index.html?scan_id=" + firstId, width: 75, height: 75 });
+                    new QRCode(document.getElementById('swal-qr'), { text: window.location.origin + "/index.html?scan_id=" + firstId, width: 85, height: 85, correctLevel: QRCode.CorrectLevel.L });
                     JsBarcode("#swal-bc", firstId, { format: "CODE128", width: 1.2, height: 35, displayValue: false, margin: 0 });
                 }
             }).then((res) => {
