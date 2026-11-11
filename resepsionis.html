@@ -12,13 +12,13 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         @media print {
-            /* PERBAIKAN: Memaksa ukuran kertas tepat 80x80mm tanpa margin browser */
-            @page { size: 80mm 80mm; margin: 0; }
+            @page { size: 80mm 80mm; margin: 0mm !important; }
             html, body { background-color: white !important; margin: 0 !important; padding: 0 !important; width: 80mm; height: 80mm; }
             .no-print, nav, .swal2-container { display: none !important; }
             #print-area { width: 100%; font-family: Arial, sans-serif; }
             #print-barcode-area { width: 80mm; height: 80mm; margin: 0; padding: 0; display: block; }
-            .print-label-wrapper { width: 80mm !important; height: 80mm !important; page-break-after: always !important; margin: 0 !important; border: none !important; }
+            /* Garis putus-putus dikembalikan dengan menghapus border: none */
+            .print-label-wrapper { width: 80mm !important; height: 80mm !important; page-break-after: always !important; margin: 0 !important; box-sizing: border-box !important; }
         }
     </style>
 </head>
@@ -187,7 +187,6 @@
         }
 
         function cetakBarcodeTunggal(id) { cetakBanyakBarcode(JSON.stringify([id])); }
-        
         function cetakBanyakBarcode(idsJsonArray) {
             const ids = JSON.parse(idsJsonArray); if (ids.length === 0) return;
             const container = document.getElementById('barcode-dynamic-container'); container.innerHTML = '';
@@ -198,8 +197,8 @@
                     const qrUrl = window.location.origin + "/index.html?scan_id=" + data.id;
                     const wrapper = document.createElement('div'); wrapper.className = 'print-label-wrapper';
                     
-                    // PERBAIKAN: Layout dimaksimalkan untuk 80mm x 80mm, border-box, padding proporsional
-                    wrapper.style.cssText = 'width: 80mm; height: 80mm; margin: 0; padding: 5mm; box-sizing: border-box; text-align: center; font-family: Arial, sans-serif; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background: white;';
+                    // PERBAIKAN: Flex-start (agar merapat ke atas), padding disesuaikan, dan border-dashed diaktifkan
+                    wrapper.style.cssText = 'width: 80mm; height: 80mm; margin: 0; padding: 4mm; box-sizing: border-box; border: 2px dashed #000; text-align: center; font-family: Arial, sans-serif; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; background: white;';
                     
                     wrapper.innerHTML = `
                         <h3 style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">LABEL PENGIRIMAN</h3>
@@ -215,7 +214,6 @@
                     container.appendChild(wrapper);
                     
                     setTimeout(() => {
-                        // QR dan Barcode ukurannya sedikit dibesarkan agar proporsional dengan 80mm
                         new QRCode(document.getElementById(`qr-${data.id}`), { text: qrUrl, width: 110, height: 110, correctLevel: QRCode.CorrectLevel.L });
                         JsBarcode(`#bc-${data.id}`, data.id, { format: "CODE128", width: 1.6, height: 40, displayValue: false, margin: 0 });
                     }, 100);

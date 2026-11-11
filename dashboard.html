@@ -14,13 +14,13 @@
         .thumbnail-img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; margin-right: 5px; }
         
         @media print {
-            /* PERBAIKAN: Memaksa ukuran kertas tepat 80x80mm tanpa margin browser */
-            @page { size: 80mm 80mm; margin: 0; }
+            @page { size: 80mm 80mm; margin: 0mm !important; }
             html, body { background-color: white !important; margin: 0 !important; padding: 0 !important; width: 80mm; height: 80mm; }
             .no-print, nav, .swal2-container { display: none !important; }
             #print-area { width: 100%; font-family: Arial, sans-serif; }
             #print-barcode-area { width: 80mm; height: 80mm; margin: 0; padding: 0; display: block; }
-            .print-label-wrapper { width: 80mm !important; height: 80mm !important; page-break-after: always !important; margin: 0 !important; border: none !important; }
+            /* Garis putus-putus dikembalikan dengan menghapus border: none */
+            .print-label-wrapper { width: 80mm !important; height: 80mm !important; page-break-after: always !important; margin: 0 !important; box-sizing: border-box !important; }
         }
     </style>
 </head>
@@ -162,8 +162,8 @@
                     const qrUrl = window.location.origin + "/index.html?scan_id=" + data.id;
                     const wrapper = document.createElement('div'); wrapper.className = 'print-label-wrapper';
                     
-                    // PERBAIKAN: Layout dimaksimalkan untuk 80mm x 80mm
-                    wrapper.style.cssText = 'width: 80mm; height: 80mm; margin: 0; padding: 5mm; box-sizing: border-box; text-align: center; font-family: Arial, sans-serif; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; background: white;';
+                    // PERBAIKAN: Flex-start (agar merapat ke atas) dan border-dashed diaktifkan
+                    wrapper.style.cssText = 'width: 80mm; height: 80mm; margin: 0; padding: 4mm; box-sizing: border-box; border: 2px dashed #000; text-align: center; font-family: Arial, sans-serif; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; background: white;';
                     
                     wrapper.innerHTML = `
                         <h3 style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">LABEL PENGIRIMAN</h3>
@@ -179,7 +179,6 @@
                     container.appendChild(wrapper);
                     
                     setTimeout(() => {
-                        // Membesarkan sedikit agar pas dengan kertas 80mm
                         new QRCode(document.getElementById(`qr-${data.id}`), { text: qrUrl, width: 110, height: 110, correctLevel: QRCode.CorrectLevel.L });
                         JsBarcode(`#bc-${data.id}`, data.id, { format: "CODE128", width: 1.6, height: 40, displayValue: false, margin: 0 });
                     }, 100);
@@ -207,14 +206,6 @@
                     }, 400);
                 }
             });
-        }
-
-        function exportCSV() {
-            if(dbCache.length === 0) return Swal.fire('Info', 'Tidak ada data', 'info');
-            let csv = 'ID,Waktu Dibuat,Pengirim,UP (Penerima),Barang,Jumlah,Tujuan,Alamat,Status,Nama Driver,Waktu Diambil,Nama Penerima Aktual,NRP,Waktu Diterima\n';
-            dbCache.forEach(d => { csv += [ d.id, `"${d.waktu_dibuat}"`, `"${d.pengirim}"`, `"${d.up}"`, `"${d.barang}"`, d.jumlah, `"${d.tujuan}"`, `"${d.alamat}"`, d.status, `"${d.driver_nama}"`, `"${d.waktu_diambil}"`, `"${d.penerima_nama}"`, `"${d.penerima_nrp}"`, `"${d.waktu_diterima}"` ].join(',') + '\n'; });
-            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-            a.download = `Rekap_SuratJalan_${new Date().getTime()}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
     </script>
 </body>
