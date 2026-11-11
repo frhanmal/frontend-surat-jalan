@@ -51,19 +51,17 @@
     <script>
         const API_URL = 'https://backend-surat-jalan.vercel.app/api/surat-jalan';
         let sigPad = null, currentActiveID = null, db = [], html5QrcodeScanner = null, mediaStream = null;
+        let base64Img = ''; // Dikembalikan seperti semula
 
         window.addEventListener('load', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const scanId = urlParams.get('scan_id');
             if (scanId) { 
                 document.getElementById('penerima-search-id').value = scanId; 
-
-                // Pastikan tombol kembali membawa scan_id ke index.html
                 const btnKembali = document.getElementById('btn-kembali');
                 if (btnKembali) {
                     btnKembali.href = `index.html?scan_id=${scanId}`;
                 }
-
                 setTimeout(cariPenerimaID, 300); 
             }
         });
@@ -142,6 +140,7 @@
                 document.getElementById('p-foto-preview').src = finalBase64; 
                 document.getElementById('p-foto-preview').classList.remove('hidden'); 
                 document.getElementById('p-foto-value').value = finalBase64;
+                base64Img = finalBase64; // Dikembalikan seperti semula
             });
         }
 
@@ -151,6 +150,7 @@
                     document.getElementById('p-foto-preview').src = finalBase64; 
                     document.getElementById('p-foto-preview').classList.remove('hidden'); 
                     document.getElementById('p-foto-value').value = finalBase64;
+                    base64Img = finalBase64; // Dikembalikan seperti semula
                 });
             } 
         }
@@ -179,53 +179,26 @@
         async function submitPenerima(event) {
             event.preventDefault();
             
-            // Ambil value dari input text
-            const nama = document.getElementById('p-nama').value;
-            const nrp = document.getElementById('p-nrp').value;
-            
-            // PERBAIKAN: Ambil value dari input hidden untuk foto
-            const foto = document.getElementById('p-foto-value').value; 
-            
-            // Ambil tanda tangan dari signature_pad
-            const ttd = sigPad.isEmpty() ? null : sigPad.toDataURL(); 
-
-            // Pengecekan di sisi frontend agar tidak bisa lanjut kalau belum lengkap
-            if (!nama || !nrp || !foto || !ttd) {
-                return Swal.fire('Peringatan', 'Mohon lengkapi Nama, NRP, Foto Bukti Fisik, dan Tanda Tangan!', 'warning');
-            }
-
-            Swal.fire({ title: 'Memproses Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            // Payload untuk dikirim ke backend
-            const payload = {
-                id: currentActiveID,
-                penerima_nama: nama,
-                penerima_nrp: nrp,
-                foto_penerima: foto,
-                ttd_penerima: ttd,
-                waktu_diterima: new Date().toLocaleString('id-ID')
+            // Dikembalikan ke format awal yang berjalan
+            const payload = { 
+                id: currentActiveID, 
+                penerima_nama: document.getElementById('p-nama').value, 
+                penerima_nrp: document.getElementById('p-nrp').value, 
+                foto_penerima: base64Img, 
+                ttd_penerima: sigPad.toDataURL(), 
+                waktu_diterima: new Date().toLocaleString('id-ID') 
             };
-
+            
+            Swal.fire({ title: 'Memproses Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             try {
-                const res = await fetch('https://backend-surat-jalan.vercel.app/api/surat-jalan/penerima', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                const res = await fetch('https://backend-surat-jalan.vercel.app/api/surat-jalan/penerima', { 
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
                 });
-
-                const responseData = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(responseData.error || 'Gagal update ke API'); 
-                }
-
-                Swal.fire('Berhasil!', 'Barang telah diterima.', 'success').then(() => {
-                    location.reload(); 
-                });
-
-            } catch (err) {
-                Swal.fire('Error', err.message, 'error');
-            }
+                if (!res.ok) throw new Error();
+                Swal.fire('Berhasil!', 'Barang telah diterima.', 'success').then(() => { location.reload(); });
+            } catch (err) { Swal.fire('Error', 'Gagal mengupdate server', 'error'); }
         }
     </script>
 </body>
