@@ -183,7 +183,14 @@
             if (!base64Img) return Swal.fire('Gagal', 'Foto wajib!', 'error');
 
             Swal.fire({ title: 'Mengirim Data...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-            const payload = { id: currentActiveID, penerima_nama: document.getElementById('p-nama').value, penerima_nrp: document.getElementById('p-nrp').value, foto_penerima: base64Img, ttd_penerima: sigPad.toDataURL(), waktu_diterima: new Date().toLocaleString('id-ID') };
+            const payload = { 
+                id: currentActiveID, 
+                penerima_nama: document.getElementById('p-nama').value, // Pastikan ID input benar
+                penerima_nrp: document.getElementById('p-nrp').value,     // Pastikan ID input benar
+                foto_penerima: base64Img, 
+                ttd_penerima: sigPad.toDataURL(), 
+                waktu_diterima: new Date().toLocaleString('id-ID') 
+            };
             try {
                 const res = await fetch(API_URL + '/penerima', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!res.ok) throw new Error("API Error");
